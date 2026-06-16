@@ -1,0 +1,31 @@
+---
+description: Marginalia project identity, naming, and branding decisions
+alwaysApply: true
+---
+
+# Project Identity
+
+**Marginalia** is a self-hosted Goodreads alternative and a replacement for Readarr.
+It manages a personal book library and integrates with NZB (Usenet) and torrent
+download clients to acquire books.
+
+## Branding / Namespaces (decided)
+
+- Product name: **Marginalia**
+- Primary domain: **marginalia.io**
+- GitHub org: **marginalia-io** (the bare `marginalia` org was taken)
+- Go module path: `marginalia` (see `go.mod`)
+
+When generating URLs, repo references, badges, or package identifiers, use
+`marginalia.io` for the domain and `marginalia-io` for GitHub.
+
+## Tech stack
+
+- Backend: Go (chi router), single-binary deploy.
+- Frontend: React SPA (Vite/pnpm) built to `internal/server/web/dist`, embedded via
+  `go:embed` and served by the Go server (API isolated under `/api`).
+- Database: SQLite via `modernc.org/sqlite` (pure Go, no CGO) to keep things small,
+  fast, and compatible with `CGO_ENABLED=0` static builds. Do NOT use Postgres or a
+  CGO-based SQLite driver (e.g. mattn/go-sqlite3).
+- Layout (skill-aligned, not goapp): `cmd/marginalia` (package main) + `internal/`
+  (`server`, `store`). Docker assets live in `docker/`.
