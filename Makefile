@@ -1,11 +1,12 @@
 BINARY := marginalia
 CMD := ./cmd/marginalia
 WEB_DIR := internal/server/web
+WGO := github.com/bokwoon95/wgo@latest
 
 GO_BUILD_FLAGS := -trimpath -ldflags='-s -w'
 export CGO_ENABLED := 0
 
-.PHONY: build frontend backend run clean
+.PHONY: build frontend backend run dev dev-frontend dev-backend clean
 
 ## build: build the frontend then the backend into a single static binary
 build: frontend backend
@@ -21,6 +22,18 @@ backend:
 ## run: run the server from source
 run:
 	go run $(CMD)
+
+## dev: run the frontend (Vite HMR) and backend (live-reload) together
+dev:
+	@$(MAKE) -j2 dev-frontend dev-backend
+
+## dev-frontend: Vite dev server with HMR (proxies /api to the backend)
+dev-frontend:
+	cd $(WEB_DIR) && pnpm dev
+
+## dev-backend: live-reloading backend; -tags dev skips the web/dist embed
+dev-backend:
+	go run $(WGO) run -tags dev $(CMD)
 
 ## clean: remove build artifacts
 clean:

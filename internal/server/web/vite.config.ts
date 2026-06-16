@@ -1,6 +1,12 @@
 import { defineConfig } from "vite-plus";
 
 export default defineConfig({
+  server: {
+    proxy: {
+      // Forward API calls to the Go backend (see `make dev`).
+      "/api": "http://localhost:8090",
+    },
+  },
   staged: {
     "*": "vp check --fix",
   },

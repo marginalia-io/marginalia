@@ -125,18 +125,39 @@ All configuration is via environment variables. Every value has a sensible defau
 
 The `Makefile` wraps the common tasks:
 
-| Target          | Description                                                       |
-| --------------- | ----------------------------------------------------------------- |
-| `make build`    | Build the frontend then the static, CGO-free Go binary            |
-| `make frontend` | Build only the embedded web assets (`web/dist`)                   |
-| `make backend`  | Build only the Go binary (requires `web/dist` to exist)           |
-| `make run`      | Run the server from source                                        |
-| `make clean`    | Remove the binary and `web/dist`                                  |
+| Target          | Description                                                  |
+| --------------- | ------------------------------------------------------------ |
+| `make dev`      | Run frontend (Vite HMR) + backend (live-reload) together     |
+| `make build`    | Build the frontend then the static, CGO-free Go binary       |
+| `make frontend` | Build only the embedded web assets (`web/dist`)              |
+| `make backend`  | Build only the Go binary (requires `web/dist` to exist)      |
+| `make run`      | Run the server from source                                   |
+| `make clean`    | Remove the binary and `web/dist`                             |
 
 The build stays `CGO_ENABLED=0` compatible (pure-Go SQLite); the Makefile sets this for you.
 
-Frontend tooling is driven by Vite+ (`vp`) from `internal/server/web`. Use `pnpm dev` for a
-hot-reloading frontend dev server while iterating on the UI.
+### Hot-reload development
+
+For day-to-day work, run both dev servers at once:
+
+```bash
+make dev
+```
+
+This starts two processes:
+
+- **Frontend** — the Vite dev server with hot-module reload. Open the app at the URL it
+  prints (e.g. `http://localhost:5173`), **not** the Go server's port.
+- **Backend** — a live-reloading Go server (via [`wgo`](https://github.com/bokwoon95/wgo))
+  built with `-tags dev`, which skips the `go:embed` of `web/dist` so it compiles without a
+  prior frontend build.
+
+The Vite dev server proxies `/api` to the Go backend on `:8090`, so the browser talks to a
+single origin and there's no CORS to configure. Edit React for instant HMR; edit Go and the
+backend restarts automatically.
+
+In production builds (`make build`), the real `web/dist` is embedded and the Go server serves
+the SPA itself — the dev-only behavior is gated behind the `dev` build tag.
 
 ## License
 

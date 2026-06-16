@@ -11,6 +11,11 @@
 # Built server binary
 /marginalia
 
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
 # Test binary, built with `go test -c`
 *.test
 
