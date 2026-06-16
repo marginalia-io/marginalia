@@ -66,30 +66,33 @@ docker/
 
 - [Go](https://go.dev/) 1.25+
 - [pnpm](https://pnpm.io/) (the frontend uses the [Vite+](https://viteplus.dev/) `vp` toolchain)
+- `make` (to use the build targets below)
+
+### Build
+
+The frontend `web/dist` directory is embedded at build time via `go:embed`, so it must exist
+before the backend is built. The `Makefile` handles both stages in one command:
+
+```bash
+make build
+```
+
+This builds the frontend (`pnpm install && pnpm build`) and then the static, CGO-free Go
+binary (`marginalia`). To build a single stage, use `make frontend` or `make backend`.
 
 ### Run locally
 
-The frontend `web/dist` directory is embedded at build time via `go:embed`, so it must exist
-before you build or run the server.
-
 ```bash
-# 1. Build the frontend
-cd internal/server/web && pnpm install && pnpm build && cd -
-
-# 2. Run the server
-go run ./cmd/marginalia
+make run
 ```
+
+`make run` runs the server from source and still relies on an embedded `web/dist`, so build
+the frontend at least once first (`make frontend`, or a full `make build`).
 
 The server listens on `http://localhost:8090` by default. Health check:
 
 ```bash
 curl http://localhost:8090/api/health
-```
-
-### Build a static binary
-
-```bash
-CGO_ENABLED=0 go build -o marginalia ./cmd/marginalia
 ```
 
 ### Run with Docker
@@ -120,16 +123,20 @@ All configuration is via environment variables. Every value has a sensible defau
 
 ## Development
 
-```bash
-# Build and vet everything
-go build ./... && go vet ./...
+The `Makefile` wraps the common tasks:
 
-# Verify a CGO-free build (required — must stay CGO_ENABLED=0 compatible)
-CGO_ENABLED=0 go build ./...
-```
+| Target          | Description                                                       |
+| --------------- | ----------------------------------------------------------------- |
+| `make build`    | Build the frontend then the static, CGO-free Go binary            |
+| `make frontend` | Build only the embedded web assets (`web/dist`)                   |
+| `make backend`  | Build only the Go binary (requires `web/dist` to exist)           |
+| `make run`      | Run the server from source                                        |
+| `make clean`    | Remove the binary and `web/dist`                                  |
+
+The build stays `CGO_ENABLED=0` compatible (pure-Go SQLite); the Makefile sets this for you.
 
 Frontend tooling is driven by Vite+ (`vp`) from `internal/server/web`. Use `pnpm dev` for a
-hot-reloading frontend dev server, and `pnpm build` to produce the embedded `web/dist`.
+hot-reloading frontend dev server while iterating on the UI.
 
 ## License
 
