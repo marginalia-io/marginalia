@@ -3,7 +3,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "target": "es2023",
+    "target": "esnext",
     "module": "esnext",
     "lib": ["ES2023", "DOM"],
     "jsx": "react-jsx",
