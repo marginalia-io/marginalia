@@ -1,6 +1,6 @@
 {
   "npm.scriptRunner": "vp",
-  "typescript.tsdk": "internal/server/web/node_modules/typescript/lib",
+  "typescript.tsdk": "frontend/node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "[javascript]": {

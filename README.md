@@ -44,13 +44,14 @@ If you're a Go developer that would like to help with the backend, I'd be more t
 
 ```text
 cmd/marginalia/main.go          entrypoint: open DB -> migrate -> start server
+frontend/                       React/Vite+ frontend; builds to internal/server/embed/dist
 internal/server/
     server.go                   Server type, New(cfg), Run(ctx) with graceful shutdown
     config.go                   Config + ConfigFromEnv() + defaults
     routes.go                   apiRouter() (mounts /api)
     handlers.go                 handleHealth (GET /api/health)
-    spa.go                      spaHandler() + go:embed web/dist (SPA + 404 logic)
-    web/                        React/Vite+ frontend; builds to web/dist
+    spa.go                      spaHandler() (SPA + 404 logic; dev stub under -tags dev)
+    embed/                      go:embed of the built frontend (dist/); dev stub
 internal/store/
     store.go                    Open(ctx, path) *sql.DB (WAL, foreign_keys, busy_timeout)
     migrate.go                  Migrate(ctx, db) via goose; embeds migrations/*.sql
@@ -70,8 +71,9 @@ docker/
 
 ### Build
 
-The frontend `web/dist` directory is embedded at build time via `go:embed`, so it must exist
-before the backend is built. The `Makefile` handles both stages in one command:
+The built frontend (`internal/server/embed/dist`) is embedded into the binary via `go:embed`,
+so it must exist before the backend is built. The `Makefile` handles both stages in one
+command:
 
 ```bash
 make build
@@ -86,8 +88,9 @@ binary (`marginalia`). To build a single stage, use `make frontend` or `make bac
 make run
 ```
 
-`make run` runs the server from source and still relies on an embedded `web/dist`, so build
-the frontend at least once first (`make frontend`, or a full `make build`).
+`make run` runs the server from source and still relies on the embedded
+`internal/server/embed/dist`, so build the frontend at least once first (`make frontend`, or a
+full `make build`).
 
 The server listens on `http://localhost:8090` by default. Health check:
 
@@ -129,10 +132,10 @@ The `Makefile` wraps the common tasks:
 | --------------- | ------------------------------------------------------------ |
 | `make dev`      | Run frontend (Vite HMR) + backend (live-reload) together     |
 | `make build`    | Build the frontend then the static, CGO-free Go binary       |
-| `make frontend` | Build only the embedded web assets (`web/dist`)              |
-| `make backend`  | Build only the Go binary (requires `web/dist` to exist)      |
-| `make run`      | Run the server from source                                   |
-| `make clean`    | Remove the binary and `web/dist`                             |
+| `make frontend` | Build only the embedded web assets (`internal/server/embed/dist`) |
+| `make backend`  | Build only the Go binary (requires the embedded `dist` to exist)  |
+| `make run`      | Run the server from source                                       |
+| `make clean`    | Remove the binary and the embedded `dist`                        |
 
 The build stays `CGO_ENABLED=0` compatible (pure-Go SQLite); the Makefile sets this for you.
 
@@ -149,15 +152,15 @@ This starts two processes:
 - **Frontend** — the Vite dev server with hot-module reload. Open the app at the URL it
   prints (e.g. `http://localhost:5173`), **not** the Go server's port.
 - **Backend** — a live-reloading Go server (via [`wgo`](https://github.com/bokwoon95/wgo))
-  built with `-tags dev`, which skips the `go:embed` of `web/dist` so it compiles without a
-  prior frontend build.
+  built with `-tags dev`, which skips the frontend `go:embed` so it compiles without a prior
+  frontend build.
 
 The Vite dev server proxies `/api` to the Go backend on `:8090`, so the browser talks to a
 single origin and there's no CORS to configure. Edit React for instant HMR; edit Go and the
 backend restarts automatically.
 
-In production builds (`make build`), the real `web/dist` is embedded and the Go server serves
-the SPA itself — the dev-only behavior is gated behind the `dev` build tag.
+In production builds (`make build`), the real frontend `dist` is embedded and the Go server
+serves the SPA itself — the dev-only behavior is gated behind the `dev` build tag.
 
 ## License
 
