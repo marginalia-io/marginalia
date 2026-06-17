@@ -4,6 +4,13 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // Emit the production build into the Go embed package so the binary can
+  // serve the SPA. emptyOutDir is required because the dir is outside the
+  // frontend project root.
+  build: {
+    outDir: "../internal/server/embed/dist",
+    emptyOutDir: true,
+  },
   resolve: {
     tsconfigPaths: true,
   },

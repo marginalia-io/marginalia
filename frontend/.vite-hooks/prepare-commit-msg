@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+# Strip Cursor's auto-injected co-author trailer from commit messages.
+# Runs via the Vite+ hooks dispatcher (core.hooksPath -> frontend/.vite-hooks/_).
+msg_file="$1"
+[ -f "$msg_file" ] || exit 0
+
+tmp="$msg_file.cursor-strip"
+grep -v 'cursoragent@cursor\.com' "$msg_file" > "$tmp" && mv "$tmp" "$msg_file"
+exit 0

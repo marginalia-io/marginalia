@@ -22,8 +22,8 @@ When generating URLs, repo references, badges, or package identifiers, use
 ## Tech stack
 
 - Backend: Go (chi router), single-binary deploy.
-- Frontend: React SPA (Vite/pnpm) built to `internal/server/web/dist`, embedded via
-  `go:embed` and served by the Go server (API isolated under `/api`).
+- Frontend: React SPA (Vite/pnpm) in `frontend/`, built to `internal/server/embed/dist`,
+  embedded via `go:embed` and served by the Go server (API isolated under `/api`).
 - Database: SQLite via `modernc.org/sqlite` (pure Go, no CGO) to keep things small,
   fast, and compatible with `CGO_ENABLED=0` static builds. Do NOT use Postgres or a
   CGO-based SQLite driver (e.g. mattn/go-sqlite3).
