@@ -1,6 +1,12 @@
 import { defineConfig } from "vite-plus";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    tsconfigPaths: true,
+  },
   server: {
     proxy: {
       // Forward API calls to the Go backend (see `make dev`).
