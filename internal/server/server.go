@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"log"
 	"net"
@@ -18,13 +19,14 @@ type Server struct {
 	shutdownTimeout time.Duration
 }
 
-// New returns a Server configured from cfg. Unset cfg fields use defaults.
-func New(cfg Config) *Server {
+// New returns a Server configured from cfg, using db for data access. Unset
+// cfg fields use defaults.
+func New(cfg Config, db *sql.DB) *Server {
 	cfg = cfg.withDefaults()
 	return &Server{
 		httpServer: &http.Server{
 			Addr:         net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)),
-			Handler:      newRouter(),
+			Handler:      newRouter(&api{db: db}),
 			ReadTimeout:  cfg.ReadTimeout,
 			WriteTimeout: cfg.WriteTimeout,
 			IdleTimeout:  cfg.IdleTimeout,
@@ -57,9 +59,9 @@ func (s *Server) Run(ctx context.Context) error {
 	return s.httpServer.Shutdown(shutdownCtx)
 }
 
-func newRouter() *chi.Mux {
+func newRouter(a *api) *chi.Mux {
 	router := chi.NewRouter()
-	router.Mount("/api", apiRouter())
+	router.Mount("/api", apiRouter(a))
 	router.Handle("/*", spaHandler())
 	return router
 }

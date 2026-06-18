@@ -9,38 +9,61 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root";
+import { Route as SetupRouteImport } from "./routes/_setup";
 import { Route as IndexRouteImport } from "./routes/index";
+import { Route as SetupSetupRouteImport } from "./routes/_setup/setup";
 
+const SetupRoute = SetupRouteImport.update({
+  id: "/_setup",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
   getParentRoute: () => rootRouteImport,
 } as any);
+const SetupSetupRoute = SetupSetupRouteImport.update({
+  id: "/setup",
+  path: "/setup",
+  getParentRoute: () => SetupRoute,
+} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
+  "/setup": typeof SetupSetupRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/setup": typeof SetupSetupRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
+  "/_setup": typeof SetupRouteWithChildren;
+  "/_setup/setup": typeof SetupSetupRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/";
+  fullPaths: "/" | "/setup";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/";
-  id: "__root__" | "/";
+  to: "/" | "/setup";
+  id: "__root__" | "/" | "/_setup" | "/_setup/setup";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
+  SetupRoute: typeof SetupRouteWithChildren;
 }
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
+    "/_setup": {
+      id: "/_setup";
+      path: "";
+      fullPath: "/";
+      preLoaderRoute: typeof SetupRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     "/": {
       id: "/";
       path: "/";
@@ -48,11 +71,29 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    "/_setup/setup": {
+      id: "/_setup/setup";
+      path: "/setup";
+      fullPath: "/setup";
+      preLoaderRoute: typeof SetupSetupRouteImport;
+      parentRoute: typeof SetupRoute;
+    };
   }
 }
 
+interface SetupRouteChildren {
+  SetupSetupRoute: typeof SetupSetupRoute;
+}
+
+const SetupRouteChildren: SetupRouteChildren = {
+  SetupSetupRoute: SetupSetupRoute,
+};
+
+const SetupRouteWithChildren = SetupRoute._addFileChildren(SetupRouteChildren);
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SetupRoute: SetupRouteWithChildren,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -6,8 +6,9 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func apiRouter() http.Handler {
+func apiRouter(a *api) http.Handler {
 	r := chi.NewRouter()
-	r.Get("/health", handleHealth)
+	r.Get("/health", a.handleHealth)
+	r.Get("/setup", a.handleSetupStatus)
 	return r
 }

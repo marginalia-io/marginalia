@@ -35,7 +35,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	srv := server.New(cfg)
+	srv := server.New(cfg, db)
 	if err := srv.Run(ctx); err != nil {
 		log.Fatal(err)
 	}
