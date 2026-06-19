@@ -3,36 +3,32 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import { Navbar } from "@/components/ui/navbar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { fetchSetupStatus } from "@/queries/setup";
 
 const RootLayout = () => {
   const matchRoute = useMatchRoute();
-  const isSetupRoute = matchRoute({ to: "/setup" });
+  const isOnboardingRoute = Boolean(matchRoute({ to: "/onboarding" }));
 
   return (
-    <>
-      {!isSetupRoute ? (
-        <>
-          <Navbar />
-        </>
-      ) : (
-        <></>
-      )}
+    <TooltipProvider>
+      {!isOnboardingRoute && <Navbar />}
       <Outlet />
       <ReactQueryDevtools buttonPosition="bottom-right" />
       <TanStackRouterDevtools position="bottom-left" />
-    </>
+    </TooltipProvider>
   );
 };
 
 export const Route = createRootRoute({
   component: RootLayout,
 
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
     const setupStatus = await fetchSetupStatus();
+    const isOnboardingRoute = location.pathname.startsWith("/onboarding");
 
-    if (!setupStatus?.completed && !window.location.pathname.startsWith("/setup")) {
-      throw redirect({ to: "/setup" });
+    if (!setupStatus?.completed && !isOnboardingRoute) {
+      throw redirect({ to: "/onboarding" });
     }
   },
 });

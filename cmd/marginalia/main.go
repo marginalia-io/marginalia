@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"marginalia/internal/server"
+	"marginalia/internal/storage"
 	"marginalia/internal/store"
 )
 
@@ -30,12 +31,18 @@ func main() {
 	}
 	log.Printf("store: sqlite ready at %s", dbPath)
 
+	storagePath := os.Getenv("STORAGE_PATH")
+	if storagePath == "" {
+		storagePath = storage.DefaultPath
+	}
+	log.Printf("storage: library path %s", storagePath)
+
 	cfg, err := server.ConfigFromEnv()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	srv := server.New(cfg, db)
+	srv := server.New(cfg, db, storagePath)
 	if err := srv.Run(ctx); err != nil {
 		log.Fatal(err)
 	}

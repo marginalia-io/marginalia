@@ -6,12 +6,14 @@ import (
 	"log"
 	"net/http"
 
+	"marginalia/internal/storage"
 	"marginalia/internal/store"
 )
 
 // api holds the dependencies shared by the HTTP API handlers.
 type api struct {
-	db *sql.DB
+	db          *sql.DB
+	storagePath string
 }
 
 func (a *api) handleHealth(w http.ResponseWriter, r *http.Request) {
@@ -33,6 +35,18 @@ func (a *api) handleSetupStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, setupStatusResponse{Completed: completed})
+}
+
+// handleStorage reports the configured library storage directory and the disk
+// space available on the volume that contains it.
+func (a *api) handleStorage(w http.ResponseWriter, r *http.Request) {
+	info, err := storage.Stat(a.storagePath)
+	if err != nil {
+		log.Printf("http: storage: %v", err)
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal error"})
+		return
+	}
+	writeJSON(w, http.StatusOK, info)
 }
 
 // writeJSON writes v as a JSON response with the given status code.

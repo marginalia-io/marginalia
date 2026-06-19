@@ -20,13 +20,14 @@ type Server struct {
 }
 
 // New returns a Server configured from cfg, using db for data access. Unset
-// cfg fields use defaults.
-func New(cfg Config, db *sql.DB) *Server {
+// cfg fields use defaults. storagePath is the on-disk location for the book
+// library (see storage.DefaultPath).
+func New(cfg Config, db *sql.DB, storagePath string) *Server {
 	cfg = cfg.withDefaults()
 	return &Server{
 		httpServer: &http.Server{
 			Addr:         net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port)),
-			Handler:      newRouter(&api{db: db}),
+			Handler:      newRouter(&api{db: db, storagePath: storagePath}),
 			ReadTimeout:  cfg.ReadTimeout,
 			WriteTimeout: cfg.WriteTimeout,
 			IdleTimeout:  cfg.IdleTimeout,

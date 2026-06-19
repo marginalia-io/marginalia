@@ -8,93 +8,97 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as SetupRouteImport } from "./routes/_setup";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as SetupSetupRouteImport } from "./routes/_setup/setup";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
 
-const SetupRoute = SetupRouteImport.update({
-  id: "/_setup",
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
-const SetupSetupRoute = SetupSetupRouteImport.update({
-  id: "/setup",
-  path: "/setup",
-  getParentRoute: () => SetupRoute,
-} as any);
+} as any)
+const OnboardingIndexRoute = OnboardingIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OnboardingRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/setup": typeof SetupSetupRoute;
+  '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRouteWithChildren
+  '/onboarding/': typeof OnboardingIndexRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/setup": typeof SetupSetupRoute;
+  '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/_setup": typeof SetupRouteWithChildren;
-  "/_setup/setup": typeof SetupSetupRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRouteWithChildren
+  '/onboarding/': typeof OnboardingIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/setup";
-  fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/setup";
-  id: "__root__" | "/" | "/_setup" | "/_setup/setup";
-  fileRoutesById: FileRoutesById;
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/onboarding' | '/onboarding/'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/onboarding'
+  id: '__root__' | '/' | '/onboarding' | '/onboarding/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  SetupRoute: typeof SetupRouteWithChildren;
+  IndexRoute: typeof IndexRoute
+  OnboardingRoute: typeof OnboardingRouteWithChildren
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/_setup": {
-      id: "/_setup";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof SetupRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_setup/setup": {
-      id: "/_setup/setup";
-      path: "/setup";
-      fullPath: "/setup";
-      preLoaderRoute: typeof SetupSetupRouteImport;
-      parentRoute: typeof SetupRoute;
-    };
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/': {
+      id: '/onboarding/'
+      path: '/'
+      fullPath: '/onboarding/'
+      preLoaderRoute: typeof OnboardingIndexRouteImport
+      parentRoute: typeof OnboardingRoute
+    }
   }
 }
 
-interface SetupRouteChildren {
-  SetupSetupRoute: typeof SetupSetupRoute;
+interface OnboardingRouteChildren {
+  OnboardingIndexRoute: typeof OnboardingIndexRoute
 }
 
-const SetupRouteChildren: SetupRouteChildren = {
-  SetupSetupRoute: SetupSetupRoute,
-};
+const OnboardingRouteChildren: OnboardingRouteChildren = {
+  OnboardingIndexRoute: OnboardingIndexRoute,
+}
 
-const SetupRouteWithChildren = SetupRoute._addFileChildren(SetupRouteChildren);
+const OnboardingRouteWithChildren = OnboardingRoute._addFileChildren(
+  OnboardingRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  SetupRoute: SetupRouteWithChildren,
-};
+  OnboardingRoute: OnboardingRouteWithChildren,
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()

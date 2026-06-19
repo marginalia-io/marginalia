@@ -10,5 +10,6 @@ func apiRouter(a *api) http.Handler {
 	r := chi.NewRouter()
 	r.Get("/health", a.handleHealth)
 	r.Get("/setup", a.handleSetupStatus)
+	r.Get("/storage", a.handleStorage)
 	return r
 }
